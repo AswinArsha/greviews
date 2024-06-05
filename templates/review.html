@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Page</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+        }
+        .logo img {
+            width: 100px;
+            height: auto;
+            margin-bottom: 40px;
+        }
+        .rating {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .rating img {
+            width: 65px;
+            height: 50px;
+            margin-bottom: 10px;
+        }
+        .stars {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            color: #ffcc00;
+        }
+        .review-count {
+            color: #5B5B5B;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .review-section {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 50px;
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+        .review-section input {
+            background-color: #ffffff;
+            padding: 10px;
+            padding-left: 20px;
+            border: none;
+            outline: none;
+            border-radius: 50px 0 0 50px;
+            flex-grow: 1;
+        }
+        .review-section button {
+            margin: 3px;
+            padding: 10px 40px;
+            border: none;
+            background-color: #FFBD59;
+            border-radius: 50px;
+            cursor: pointer;
+            color: #5B5B5B;
+            border: 1px solid #5B5B5B;
+        }
+        .review-section button:hover {
+            background-color: #ffb807;
+        }
+        .powered-by {
+            display: flex;
+            align-items: center;
+            margin-top: 40px;
+            color: #888;
+        }
+        .powered-by img {
+            width: 130px;
+            height: auto;
+            filter: grayscale(100%);
+            margin-left: 10px;
+            opacity: 0.5;
+            mix-blend-mode: multiply;
+        }
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 0.75rem 1.25rem;
+            border: 1px solid #c3e6cb;
+            border-radius: 0.25rem;
+            margin-top: 1rem;
+        }
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 0.75rem 1.25rem;
+            border: 1px solid #f5c6cb;
+            border-radius: 0.25rem;
+            margin-top: 1rem;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const reviewLinkBtn = document.getElementById("review-btn");
+            const clientId = reviewLinkBtn.getAttribute("data-client-id");
+            const salesmanId = reviewLinkBtn.getAttribute("data-salesman-id");
+
+            reviewLinkBtn.addEventListener("click", function() {
+                setTimeout(() => {
+                    checkReviewIncrement(clientId, salesmanId);
+                }, 2000);
+            });
+        });
+
+        function checkReviewIncrement(clientId, salesmanId) {
+            fetch(`/check_review_increment/${clientId}/${salesmanId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageContainer = document.createElement('div');
+                if (data.status === 'success') {
+                    messageContainer.classList.add('success-message');
+                    messageContainer.textContent = data.message;
+                    document.getElementById('review-count').innerText = `(${data.new_count})`;
+                } else {
+                    messageContainer.classList.add('error-message');
+                    messageContainer.textContent = data.message;
+                }
+                document.body.appendChild(messageContainer);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="logo">
+        <img src="{{ logo_url }}" alt="company Logo">
+    </div>
+    <div class="rating">
+        <img src="https://cdn.freebiesupply.com/logos/thumbs/2x/google-g-2015-logo.png" alt="Google Logo">
+        <div class="stars">
+            ★★★★★ <span class="review-count" id="review-count">({{ review_count }})</span>
+        </div>
+    </div>
+    <div class="review-section">
+        <input type="text" value="SalesmanID: {{ salesman_id }}" disabled>
+        <a href="{{ review_url }}" id="review-btn" data-client-id="{{ client_id }}" data-salesman-id="{{ salesman_id }}">
+            <button>Review</button>
+        </a>
+    </div>
+    <div class="powered-by">
+        <span>Powered by</span>
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Whitetap Logo">
+    </div>
+</body>
+</html>
